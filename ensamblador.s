@@ -12,15 +12,12 @@
 ;	Declaración de directivas del ordenador
 		.data
 
-PrintFormat:	.asciiz		"%d\n"
-				.align		2
-PrintPar:	.word		PrintFormat
-PrintValue:	.space		4
+
 
 valor_inicial: .word 10
 
 ;; VARIABLES DE SALIDA:
-secuencia: .space 120*4
+secue: 	.space 120*4
 secuencia_tamanho: .word 0
 secuencia_maximo: .word 0
 secuencia_valor_medio: .float 0
@@ -54,6 +51,7 @@ loop:
 	sw		secuencia_tamanho, r6
 	sf		secuencia_valor_medio, f16
 
+
 	
 	;Añadimos al array secuencia un valor nuevo
 
@@ -64,17 +62,17 @@ loop:
 	;multiplicamos para saber justo la direccion
 	mult	r10, r6, r11
 	;carga registro base en r9
-	add		r9, r0, secuencia
-	
+	add		r9, r0, secue
 	add		r9, r9, r10
 	;movemos la direccion
-	sw		0(r9), r8   
+	sw		0(r9), r4
 	
 	
 	
 	;añadimos secuencia_tamaño
 	lw		r6, secuencia_tamanho	
 	addi	r6, r6, 1
+	sw		secuencia_tamanho, r6
 
 	;Añadimos el valor máximo	r12 es 1 si r3 > secuencia_maximo	
 	;Bajamos a Registros el valor en memoria
@@ -99,7 +97,6 @@ loop:
 	addi	r4, r4, 1 
 	add		r3, r4, r0	; A[n-1] = A[n]
 	
-
 	j	loop
 
 
@@ -108,37 +105,6 @@ par:
 	srli	r4, r3, 1	; A[n] = A[n-1]/2
 	add		r3, r4, r0	; A[n-1] = A[n]
 	j	loop
-
-
-
-; Para que se escriban los valores que se van calculando
-print:
-	sw	PrintValue, r4
-	addi	r14, r0, PrintPar
-	trap	5
-	jr	r31
-
-
-; comprobacion de los valores del array lista
-print1:
-	add		r20, r0, lista
-	addi	r20, r20, 16
-	lw		r21, 0(r20)
-	sw		PrintValue, r21
-	addi	r14, r0, PrintPar
-	trap	5
-	jr	r31
-
-
-; Esto sirve para la comprobacion de los valores del array secuencia
-print2:
-	add	r20, r0, secuencia
-	addi	r20, r20,4
-	lw		r21, 0(r20)
-	sw		PrintValue, r21
-	addi	r14, r0, PrintPar
-	trap	5
-	jr	r31
 
 
 
@@ -155,69 +121,77 @@ estadisticasFinales:
 	lw		r6, valor_inicial
 	lw		r7, secuencia_tamanho
 	lw		r8, secuencia_maximo
-	;Es la suma solo
-	lf		f9, secuencia_valor_medio
 	
-	movi2fp	f6, r6
+	
+	
 	movi2fp	f7, r7
 	movi2fp	f8, r8
+	movi2fp	f6, r6
+
+	cvti2f	f7, f7
+	cvti2f	f8, f8
+	cvti2f	f6, f6
+	cvti2f	f9, f9
+
+	cvti2f	f12, f12
 	
+	
+
+	;Es la suma solo
+	lf		f9, secuencia_valor_medio
+
 	;Tenemos secuencia_valor_medio
 	divf	f9, f9, f7
-	sf		secuencia_valor_medio, f9
-
+	
 
 	; vamos sumandole 4 a lista y añadiendole elementos
 	add		r20, r0, lista
+
+	
+	
 	
 	
 	; vIni*vT	0
-	mult	r10, r6, r7
-	sw		0(r20), r10
+	multf	f12, f6, f7
+	sf		0(r20), f12
 	addi	r20, r20, 4
 	; vMax*vT	4
-	mult	r11, r8, r7
-	sw		0(r20), r11
+	multf	f12, f8, f7
+	sf		0(r20), f12
 	addi	r20, r20, 4
 	; vMed*vT	8
-	mult	r12, r9, r7
-	sw		0(r20), r12
+	multf	f12, f9, f7
+	sf		0(r20), f12
 	addi	r20, r20, 4
 	; (vIni/vMax)*vT	12
-	divf	f13, f6, f8
-	multf	f13, f13, f7
-	sf		0(r20), f13
+	divf	f12, f6, f8
+	multf	f12, f12, f7
+	sf		0(r20), f12
 	addi	r20, r20, 4
 	; (vIni/vMed)*vT	16
-	divf	f19, f6, f9
-	multf	f19, f19, f7
-	sf		0(r20), f19
+	divf	f12, f6, f9
+	multf	f12, f12, f7
+	sf		0(r20), f12
 	addi	r20, r20, 4
 	; (vMax/vIni)*vT	20
-	div 	r18, r8, r6
-	mult	r18, r18, r7
-	sw		0(r20), r18
+	divf 	f12, f8, f6
+	multf	f12, f12, f7
+	sf		0(r20), f12
 	addi	r20, r20, 4
-	; (vMax/vMed)*vT	24
-	div		r15, r8, r9
-	mult	r15, r15, r7
-	sw		0(r20), r16
-	addi	r20, r20, 4
-	; (vMed/vIni)*vT	28
-	div		r16, r9, r6
-	mult	r16, r16, r7
-	sw		0(r20), r17
-	addi	r20, r20, 4
-	; (vMed/vMax)*vT	32
-	div		r17, r9, r8
-	mult	r17, r17, r7
-	sw		0(r20), r18
-	addi	r20, r20, 4
+	
 
 
+	sf		secuencia_valor_medio, f9
+
+	
 	;Ahora tenemos todos los registros añadidos con las variables, tenemos que introducir
-	jal print1
+	;jal print1
 
 	jalr r31 
 
-	
+
+
+
+
+
+
