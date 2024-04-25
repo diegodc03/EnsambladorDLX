@@ -12,7 +12,7 @@
 ;	Declaración de directivas del ordenador
 		.data
 
-valor_inicial: .word 97
+valor_inicial: .word 10
 
 ;; VARIABLES DE SALIDA:
 secuencia: 	.space 120*4
@@ -109,18 +109,26 @@ estadisticasFinales:
 	lw		r7, secuencia_tamanho
 	lw		r8, secuencia_maximo
 	
+	addi	r9, r0, 9
+	
+	
+
 	movi2fp	f7, r7
 	movi2fp	f8, r8
 	movi2fp	f6, r6
+	movi2fp	f24, r9
 
 	;Es la suma solo
 	lf		f9, secuencia_valor_medio
 	;Tenemos secuencia_valor_medio
 	divf	f9, f9, f7
 
+	lf		f10, lista_valor_medio
+
 	cvti2f	f7, f7
 	cvti2f	f8, f8
 	cvti2f	f6, f6
+	cvti2f	f24, f24
 	
 	; vamos sumandole 4 a lista y añadiendole elementos
 	add		r20, r0, lista
@@ -131,51 +139,60 @@ estadisticasFinales:
 	; vIni*vT	0
 	multf	f12, f6, f7
 	sf		0(r20), f12
+	addf	f10, f10, f12
 	addi	r20, r20, 4
 	; vMax*vT	4
 	multf	f13, f8, f7
 	sf		0(r20), f13
+	addf	f10, f10, f13
 	addi	r20, r20, 4
 	; vMed*vT	8
 	multf	f14, f9, f7
 	sf		0(r20), f14
+	addf	f10, f10, f14
 	addi	r20, r20, 4
 	; (vIni/vMax)*vT	12
 	divf	f15, f6, f8
 	multf	f16, f15, f7
 	sf		0(r20), f16
+	addf	f10, f10, f16
 	addi	r20, r20, 4
 	; (vIni/vMed)*vT	16
 	divf	f17, f6, f9
 	multf	f18, f17, f7
 	sf		0(r20), f18
+	addf	f10, f10, f18
 	addi	r20, r20, 4
 	; (vMax/vIni)*vT	20
 	divf 	f19, f8, f6
 	multf	f20, f19, f7
 	sf		0(r20), f20
+	addf	f10, f10, f20
 	addi	r20, r20, 4
 	; (vMax/vMed)*vT	24
 	divf	f21, f8, f9
 	multf	f22, f21, f7
 	sf		0(r20), f22
+	addf	f10, f10, f22
 	addi	r20, r20, 4
 	; (vMed/vIni)*vT	28
 	divf	f16, f9, f6
 	multf	f16, f16, f7
 	sf		0(r20), f16
+	addf	f10, f10, f16
 	addi	r20, r20, 4
 	; (vMed/vMax)*vT	32
 	divf	f17, f9, f8
 	multf	f17, f17, f7
 	sf		0(r20), f17
+	addf	f10, f10, f17
+
+	
+	divf	f10, f10, f24 
+	sf		lista_valor_medio, f10
 
 
 	jalr r31 
-
-
-
-
 
 
 
