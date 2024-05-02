@@ -17,13 +17,13 @@ PrintFormat:	.asciiz		"%d\n"
 PrintPar:	.word		PrintFormat
 PrintValue:	.space		4
 
-valor_inicial: .word 7
+valor_inicial: .word 97
 
 ;; VARIABLES DE SALIDA:
 secuencia: .space 120*4
 secuencia_tamanho: .word 0
 secuencia_maximo: .word 0
-secuencia_valor_medio: .word 0
+secuencia_valor_medio: .float 0.0
 lista: .space 9*4
 lista_valor_medio: .float 0.0
 ;; FIN VARIABLES DE ENTRADA Y SALIDA
@@ -33,84 +33,167 @@ lista_valor_medio: .float 0.0
 		.global main
 
 main:
-	lw	r2, valor_inicial ; N
-	addi	r5, r0, 3 ; 3
+
+	lw		r5, valor_inicial 	; N
 	
-	add		r3, r2, r0 ; A[n] 
-	add		r4, r2, r0 ; A[n-1]
+	addi	r2, r0, 1
+	add		r3, r0, r5 ;		 secuencia_maximo
+	andi	r20, r5, 1      ; r7 = A[n-1] AND 1 (comprueba paridad)
+	addi r9, r0, secuencia ; Cargar la dirección base de secuencia en r10
+
+
+	sw   0(r9), r5                   ; Almacenar el nuevo elemento en la secuencia
+	addi  r9, r9, 4                  ; Calcular la dirección del nuevo elemento
+	beqz	r20, par        ; Salta a 'par' si A[n-1] es par	
+
 	
-	addi	r16, r0, 0 ; valor medio
-	add		r17, r0, r2 ; secuencia_maximo
-
-
-
-loop:
-    ; Cargar secuencia_tamanho y secuencia_valor_medio
-    lw   r6, secuencia_tamanho       ; Cargar secuencia_tamanho en r6
-    lw   r16, secuencia_valor_medio   ; Cargar secuencia_valor_medio en r16
-    addi r11, r0, 4                  ; Cargar 4 en el registro r11
-    
-    ; Incrementar secuencia_tamanho
-    addi r6, r6, 1                    ; Incrementar secuencia_tamanho
-    sw   secuencia_tamanho, r6        ; Guardar el nuevo valor de secuencia_tamanho
-    
-    ; Calcular la dirección para el nuevo elemento de secuencia  y Actualizar secuencia_valor_medio
-   
-    mult r10, r6, r11                   ; Multiplicar secuencia_tamanho por 4 (tamaño de elemento)
-    addi r9, r0, secuencia            ; Cargar la dirección base de secuencia en r9
-    add  r16, r16, r3                 ; Sumar el valor actual a secuencia_valor_medio
-    add  r8, r3, r0                   ; Cargar el valor a añadir en r8
-   
-    sw   secuencia_valor_medio, r16   ; Guardar el nuevo valor de secuencia_valor_medio
-    lw   r17, secuencia_maximo        ; Cargar secuencia_maximo en r17
-    add  r9, r9, r10                  ; Calcular la dirección del nuevo elemento
-    
-    ; Guardar el nuevo elemento en secuencia
-  
-    ; Comparar y actualizar secuencia_maximo si es necesario
-    
-    sgt  r6, r3, r17                  ; Comparar r3 con secuencia_maximo
-    sw   0(r9), r8                    ; Almacenar el nuevo elemento en la secuencia
-    beqz r6, no_mayor                 ; Saltar si r3 no es mayor que secuencia_maximo
-    
-    add  r17, r0, r3                  ; Actualizar secuencia_maximo con r3
-    sw   secuencia_maximo, r17        ; Guardar el nuevo valor de secuencia_maximo
-    
-no_mayor:
-
-	; Comprueba si A[n-1] es 1 para finalizar
-	subi	r6, r3, 1      ; r6 = A[n-1] - 1
-	jal	print          ; Llama a la función print para mostrar el valor
-	andi	r7, r3, 1      ; r7 = A[n-1] AND 1 (comprueba paridad)
-	beqz	r6, finish     ; Salta a 'finish' si A[n-1] es 1 (finaliza)
-	beqz	r7, par        ; Salta a 'par' si A[n-1] es par
+	
+impar:	
+	
+	add	r4, r4, r5
+	
 	
 	; Si A[n-1] es impar
-	mult	r4, r3, r5     ; r4 = A[n-1] * 3
-	;addi	r4, r4, 1      ; No se usa este resultado
-	addi	r3, r4, 1      ; A[n-1] = A[n] + 1
+	addi	r6, r5, 1      
+	sll 	r5, r5, 1
+	add 	r5, r5, r6	 ; A[n] = A[n-1] + 1
+	sgt  r19, r5, r3                  ; Comparar r3 con secuencia_maximo
+
+	sw   0(r9), r5                   ; Almacenar el nuevo elemento en la secuencia
+	addi  r9, r9, 4                  ; Calcular la dirección del nuevo elemento
+
+	beqz r19, par                 ; Saltar si r3 no es mayor que secuencia_maximo
+    add  r3, r0, r5                  ; Actualizar secuencia_maximo con r3
+
+
+par_mayor:
+
+	add	r4, r4, r5
+	addi r2, r2, 1                    ; Incrementar secuencia_tamanho
+
+	; Si A[n-1] es par
+	srli	r5, r5, 1      ; r4 = A[n-1] >> 1 (divide A[n-1] entre 2)
 	
-	j	loop              ; Salta de vuelta al inicio del bucle
+	andi	r20, r5, 1      ; r7 = A[n-1] AND 1 (comprueba paridad)
+	sw   0(r9), r5                   ; Almacenar el nuevo elemento en la secuencia
+	addi  r9, r9, 4                  ; Calcular la dirección del nuevo elemento
+	
+	beqz	r20, par        ; Salta a 'par' si A[n-1] es par	
+	addi r2, r2, 1
+
+	j	impar              ; Salta de vuelta al inicio del bucle
+
 
 par:
-	; Si A[n-1] es par
-	srli	r4, r3, 1      ; r4 = A[n-1] >> 1 (divide A[n-1] entre 2)
-	add		r3, r4, r0     ; A[n-1] = A[n]
-	j	loop              ; Salta de vuelta al inicio del bucle
 
-print:
-	; Imprime el valor en r4
-	sw	PrintValue, r4   ; Almacena el valor a imprimir
-	addi	r14, r0, PrintPar  ; Carga la dirección de la cadena de formato
-	trap	5               ; Llama al servicio para imprimir el valor
-	jr	r31              ; Vuelve de la llamada
+	add	r4, r4, r5
+	
+
+	; Si A[n-1] es par
+	srli	r5, r5, 1      ; r4 = A[n-1] >> 1 (divide A[n-1] entre 2)
+	
+	andi	r20, r5, 1      ; r7 = A[n-1] AND 1 (comprueba paridad)
+	sw   0(r9), r5                   ; Almacenar el nuevo elemento en la secuencia
+	addi  r9, r9, 4                  ; Calcular la dirección del nuevo elemento
+	addi r2, r2, 1                    ; Incrementar secuencia_tamanho
+	beqz	r20, par        ; Salta a 'par' si A[n-1] es par	
+
+	snei 	r21, r5, 1      ; 1 o no 1 	
+	addi r2, r2, 1                    ; Incrementar secuencia_tamanho
+	beqz	r21, finish     ; Salta a 'finish' si A[n-1] es 1 (finaliza)
+
+	j	impar              ; Salta de vuelta al inicio del bucle
+
 
 finish:
 	; Finaliza el programa
-	trap	0               ; Llama al servicio de finalización del programa
+	
+	add	r4, r4, r5
+	
 
 
+estadisticasFinales:
+	; Cargamos los valores de entrada desde la memoria
 
+	lf 		f4, valor_inicial		 ; Cargamos el valor inicial de la secuencia en f2
 
+	movi2fp	f2, r2                    ; Convertimos el tamaño de la secuencia a punto flotante
+	movi2fp	f3, r4                    ; Convertimos el máximo de la secuencia a punto flotante
+
+	cvti2f	f2, f2
+	cvti2f	f3, f3
+	cvti2f	f4, f4
+	
+	divf	f1, f3, f2                 ; Dividimos el valor medio de la secuencia por el tamaño de la secuencia y lo almacenamos en f1
+	
+	
+	multf 	f6, f4, f2 ; vIni*vT
 
 	
+	movi2fp	f5, r3                    ; Convertimos el máximo de la secuencia a punto flotante
+	cvti2f	f5, f5
+	addi 	r21, r0, 9                
+	movi2fp	f16, r21                   
+	cvti2f	f16, f16
+
+	divf 	f9,  f6, f5 ; vIni*vT/vMax
+	sf		lista, f6 ; Guardamos vIni*vT en la lista
+	addf 	f15, f15, f6 ; Sumamos el valor a la suma total
+	
+	multf 	f7, f5, f2 ; vMax*vT
+	sw		secuencia_tamanho, r2     ; Cargamos el tamaño de la secuencia desde la memoria a r6
+	sw 		secuencia_maximo, r3      ; Cargamos el máximo de la secuencia desde la memoria a r3
+	
+	multf 	f8, f1, f2 ; vMed*vT
+	sf		lista+0x4, f7 ; Guardamos vMax*vT en la lista
+	
+	addf 	f15, f15, f7 ; Sumamos el valor a la suma total
+	divf  	f10, f6, f1 ; (vIni/vMed)*vT 
+	
+	
+	sf		lista+0x8, f8 ; Guardamos vMed*vT en la lista
+	addf 	f15, f15, f8 ; Sumamos el valor a la suma total
+	
+	sf		lista+0xc, f9 ; Guardamos (vi/vMax)*vT en la lista
+	addf 	f15, f15, f9 ; Sumamos el valor a la suma total
+	
+	divf  	f11, f7, f4 ; (vMax/vIni)*vT
+
+	sf 		lista+0x10, f10 ; Guardamos (vi/vMed)*vT en la lista
+	addf 	f15, f15, f10 ; Sumamos el valor a la suma total
+	
+	divf  	f12, f7, f1 ; (vMax/vMed)*vT 
+
+	sf 		lista+0x14, f11 ; Guardamos (vMax/vIni)*vT en la lista
+	addf 	f15, f15, f11 				; Sumamos el valor a la suma total
+	
+	divf  	f13, f8, f4 				; (vMed/vIni)*vT
+	
+	sf 		lista+0x18, f12 			; Guardamos (vMax/vMed)*vT en la lista
+	addf 	f15, f15, f12 				; Sumamos el valor a la suma total
+	
+
+	divf  	f14, f8, f5 				; (vMed/vMax)*vT 
+
+	sf 		lista+0x1c, f13 			; Guardamos (vMed/vIni)*vT en la lista
+	addf 	f15, f15, f13 				; Sumamos el valor a la suma total
+	
+	sf 		lista+0x20, f14 			; Guardamos (vMed/vMax)*vT en la lista
+	addf 	f15, f15, f14 				; Sumamos el valor a la suma total
+	
+
+	sf 		secuencia_valor_medio, f1	; Cargamos el valor medio de la secuencia desde la memoria a f1
+
+	divf	f17, f15, f16 ; Dividimos el valor medio de la secuencia por el tamaño de la secuencia y lo almacenamos en f1
+	sf		lista_valor_medio, f15 ; Guardamos el valor medio de la secuencia en la lista
+
+	
+
+	trap 0
+	
+
+	; Finalizamos el programa
+	;jalr	r31
+
+
+
