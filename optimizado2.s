@@ -50,22 +50,22 @@ main:
 	addi  r9, r9, 4                  ; Calcular la dirección del nuevo elemento
 	
 	divf	f16, f17, f16 ; 1/9
+	add		r6, r5, r0
 
 	beqz	r20, par_mayor        ; Salta a 'par' si A[n-1] es par	
-	;addi	r6, r5, 1
 	
+	sll 	r5, r5, 1
 	
 impar:	
 
-	addi	r6, r5, 1
-	
-	add	r4, r4, r5
+	add	r4, r4, r6
 	
 	
 	; Si A[n-1] es impar
 	      
-	sll 	r5, r5, 1
+	;sll 	r5, r5, 1
 	add 	r5, r5, r6	 ; A[n] = A[n-1] + 1
+	addi	r5, r5, 1
 	sgt  r19, r5, r3                  ; Comparar r3 con secuencia_maximo
 
 	sw   secuencia(r9), r5                   ; Almacenar el nuevo elemento en la secuencia
@@ -79,10 +79,10 @@ par_mayor:
 
 	add	r4, r4, r5
 	
-	srli	r5, r5, 1      ; r4 = A[n-1] >> 1 (divide A[n-1] entre 2)
+	srli	r6, r5, 1      ; r4 = A[n-1] >> 1 (divide A[n-1] entre 2)
 	
-	andi	r20, r5, 1      ; r7 = A[n-1] AND 1 (comprueba paridad)
-	sw   secuencia(r9), r5                   ; Almacenar el nuevo elemento en la secuencia
+	andi	r20, r6, 1      ; r7 = A[n-1] AND 1 (comprueba paridad)
+	sw   secuencia(r9), r6                   ; Almacenar el nuevo elemento en la secuencia
 	addi  r9, r9, 4                  ; Calcular la dirección del nuevo elemento
 	
 	bnez	r20, impar        ; Salta a 'par' si A[n-1] es par	
@@ -92,26 +92,26 @@ par_mayor:
 
 par:
 
-	add	r4, r4, r5
-	srli	r5, r5, 1      ; r4 = A[n-1] >> 1 (divide A[n-1] entre 2)
+	add	r4, r4, r6
+	srli	r6, r6, 1      ; r4 = A[n-1] >> 1 (divide A[n-1] entre 2)
 	
-	andi	r20, r5, 1      ; r7 = A[n-1] AND 1 (comprueba paridad)
-	sw   secuencia(r9), r5                   ; Almacenar el nuevo elemento en la secuencia
+	andi	r20, r6, 1      ; r7 = A[n-1] AND 1 (comprueba paridad)
+	sw   secuencia(r9), r6                   ; Almacenar el nuevo elemento en la secuencia
 	addi  r9, r9, 4                  ; Calcular la dirección del nuevo elemento
 	
 	beqz	r20, par        ; Salta a 'par' si A[n-1] es par	
 
-	snei 	r21, r5, 1      ; 1 o no 1 	
-	addi	r6, r5, 1
+	subi 	r21, r6, 1      ; 1 o no 1 	
+	add	r4, r4, r6
 	beqz	r21, finish     ; Salta a 'finish' si A[n-1] es 1 (finaliza)
 
 	
 impar_menor:	
 	
-	add	r4, r4, r5
+	
 	      
-	sll 	r5, r5, 1
-	add 	r5, r5, r6	 ; A[n] = A[n-1] + 1
+	sll 	r5, r6, 2
+	sub 	r5, r5, r21	 ; A[n] = A[n-1] + 1
 
 	sw   secuencia(r9), r5                   ; Almacenar el nuevo elemento en la secuencia
 	addi  r9, r9, 4                  ; Calcular la dirección del nuevo elemento
@@ -123,7 +123,7 @@ impar_menor:
 finish:
 	; Finaliza el programa
 		
-	add		r4, r4, r5
+	;add		r4, r4, r6
 	srli 	r2, r9, 2
 	
 
@@ -203,11 +203,8 @@ estadisticasFinales:
 	
 	multf	f22, f15, f16 ; Dividimos el valor medio de la secuencia por el tamaño de la secuencia y lo almacenamos en f1
 	
-	
-	
+		
 	sf		lista_valor_medio, f22 ; Guardamos el valor medio de la secuencia en la lista
-
-
 
 
 	trap 0
