@@ -1,7 +1,7 @@
 ;Practica entregable DLX 
 
 ;Carlos Conde VIcente
-;Diego de Castro Merillas
+;Diego de Castro Merillas	71043687E
 
 ; 	A[0] = valor_inicial
 ; 	A[n] = Si A[n-1] 	es par	A[n] = A[n-1] / 2
@@ -12,7 +12,8 @@
 ;	Declaración de directivas del ordenador
 		.data
 
-valor_inicial: .word 10
+;Valor Inicial
+valor_inicial: .word	10
 
 
 ;; VARIABLES DE SALIDA:
@@ -24,59 +25,49 @@ lista: .space 9*4
 lista_valor_medio: .float 0		
 ;; FIN VARIABLES DE ENTRADA Y SALIDA
 
+;Comenzamos programa
+
+
 		.text
 		.global main
 
-
-
-		
-
 main:
+	
+	addi	r21, r0, 1	;	r21 = 1
+	addi	r2, r0, 0	;	r2 = 0
 
-;;;;;;;;;;;;;;;;;;;;;;;
+	lw		r5, valor_inicial	; N		A[n]
 
-	addi	r21, r0, 1
-	addi	r2, r0, 0
-
-	lw		r5, valor_inicial ; N	A[n]
-
-	add		r3, r0, r5 ; secuencia_maximo
-	add		r6, r0, r5 ; A[n-1]
-	add		r7, r0,	3
-	;andi	r20, r5, 1      ; r7 = A[n-1] AND 1 (comprueba paridad)
-	addi	r4, r0, 0		; añadir a r4 el valor 0
-	addi 	r9, r0, secuencia ; Cargar la dirección base de secuencia en r10
+	add		r3, r0, r5 			; r3 = valor secuencia_maximo
+	add		r6, r0, r5			; A[n-1]
+	add		r7, r0,	3			; r7 = 3
+	addi	r4, r0, 0			; r4 = secuencia_valor_medio  --> se hace la suma en el loop
+	addi 	r9, r0, secuencia 	; Cargar la dirección base de secuencia en r9
 
 
 loop:
+	; Estadisiticas
 
-	; Añadimos estadisticas
+	add	r4, r4, r5		; Sumamos el valor de A[n] a r4
+
+	sw		0(r9), r5	; Añadimos al array secuencia, el registro r5
+
+	addi	r9, r9, 4	; Sumamos un byte para añadir el proximo valor del array
 	
-	;Sumamos el valor medio
-	add	r4, r4, r5 
+	addi	r2, r2, 1	; Sumamos 1 para secuencia tamaño
 
-	;Añadimos al array secuencia un valor nuevo
-	;Añadimos a r11 4 para los bytes y la secuencia
-	sw		0(r9), r5
-
-	addi	r9, r9, 4
-	
-
-	;añadimos secuencia_tamaño
-	addi	r2, r2, 1
-
-	;Añadimos el valor máximo	r12 es 1 si r3 > secuencia_maximo	
+	;Añadimos el valor máximo	r19 es 1 si r3 > secuencia_maximo	
 	;Comprobamos valor
-	sgt		r19, r5, r3
-	beqz	r19, no_mayor
-	add		r3, r0, r5
+	sgt		r19, r5, r3		; Guarda en R19, si r5 > r3, 1, caso contrario, 0
+	beqz	r19, no_mayor	; si es 0 salta, si es 1 no salta (brancj if equal 0)
+	add		r3, r0, r5		; Si no salta, r3 guarda el nuevo valor
 	no_mayor:
 	
+	; Si A[n-1] es 1 finaliza
+	subi	r21, r5, 1		;Guarda en r21, la resta entre el valor y 1
+	beqz	r21, finish		; Si es 0 va a finish
 
-	subi	r21, r5, 1	; Si A[n-1] es 1 finaliza
-	beqz	r21, finish
-
-	andi	r20, r5, 1	; ; Si A[n-1] es par
+	andi	r20, r5, 1	; ; Si A[n-1] es par	-- en r20 guarda 0 o 1 si es par impar
 	beqz	r20, par
 	mult	r5, r5, r7	; Si A[n-1] es impar
 	addi	r6, r5, 1 
@@ -93,6 +84,7 @@ par:
 
 
 finish:
+	; Guardamos en memoria los registros relacionados con las variables pedidas que no se van a usar más
 	sw		secuencia_tamanho, r2
 	sw		secuencia_maximo, r3	
 
@@ -107,23 +99,21 @@ estadisticasFinales:
 	lw		r5, valor_inicial
 	addi	r21, r0, 9
 	
+	; Copia el valor de el registro word a punto flotante
 	movi2fp	f16, r21
 	movi2fp f3, r4	;	suma_secuencia
 	movi2fp	f2, r2	;	secuencia_tamanho vT
 	movi2fp	f5, r3	;	secuencia_maximo
 	movi2fp	f4, r5	;	valor inicial
 
-	;movi2fp	f24, r9
 
 
-
-	;cvti2f	f3, f3
 	;Es la suma solo
 	;Tenemos secuencia_valor_medio
 	divf	f1, f3, f2		;vmed
 	
 
-
+	; Pasamos el valor a punto Flotante
 	cvti2f	f3, f3
 	cvti2f	f2, f2
 	cvti2f	f5, f5
