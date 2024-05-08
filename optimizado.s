@@ -1,5 +1,10 @@
 ;Practica entregable DLX 
 
+;++++++++++++++
+;+ OPTIMIZADA +
+;++++++++++++++
+
+
 ;Carlos Conde VIcente
 ;Diego de Castro Merillas
 
