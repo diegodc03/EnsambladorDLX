@@ -1,0 +1,61 @@
+
+secuencia: .space 120*4
+secuencia_tamanho: .word 0
+secuencia_maximo: .word 0
+secuencia_valor_medio: .word 0
+lista: .space 9*4
+lista_valor_medio: .float 0.0
+
+
+
+V inicial = 		R1
+Secuencia tam = 	R2
+" max = 			R3
+Suma secuencia		R4
+An = 				R5
+An-1. = 			R6
+byte secuencia = 	R9
+Byte lista = 		R20 
+1	=				R11
+
+VMed =	 		f1 
+vT = 			f2
+Suma secuencia=		f3
+Vini=			f4
+vMax=			f5
+
+vIni*vT =		f6
+vMax*vT = 		f7
+vMed*vT =		f3
+
+
+(vIni/vMax)*vT =	f9
+(vMed/vMax)*vT =	f14
+
+(vMax/vIni)*vT =	f11
+(vMed/vIni)*vT =	f13
+
+(vIni/vMed)*vT =	f10
+(vMax/vMed)*vT =	f12	
+
+
+
+Media lista = 		f15
+9 = 			f16
+1 = 			f17
+
+1/vMax = 		f18
+1/vIni = 		f19
+1/vMed = 		f20
+
+1248
+
+
+
+
+
+
+
+Mayor
+
+1/div
