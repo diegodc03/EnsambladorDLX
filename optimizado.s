@@ -1,12 +1,13 @@
 ;Practica entregable DLX 
 
+
+;Carlos Conde VIcente		70919412Q
+;Diego de Castro Merillas	71043687E
+
 ;++++++++++++++
-;+ OPTIMIZADA +
+;+ OPTIMIZADO +
 ;++++++++++++++
 
-
-;Carlos Conde VIcente
-;Diego de Castro Merillas
 
 ; 	A[0] = valor_inicial
 
